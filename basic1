@@ -13,6 +13,18 @@ contract Mycontract{
 
      mapping(int =>string) public people;
      mapping(int=>person) public persons;
+
+     address owner;  
+     uint256 openingTime=1738044175;
+
+     modifier onlyOwner(){ /* only owner can call it */
+            require(owner==msg.sender);
+            _;
+     }
+      modifier onlyOpen(){ /* Open for a certain period of time*/
+            require(  block.timestamp <= openingTime);
+            _;
+     }
      
 
      struct student{
@@ -33,6 +45,7 @@ contract Mycontract{
             value="Gourab";
             myname="Gourab";
             state=State.Waiting;
+            owner=msg.sender; 
      }
      function get() public view returns(string memory){
            return value;
@@ -54,12 +67,12 @@ contract Mycontract{
         count++;
      }
 
-     function addpeople(string memory name) public {
+     function addpeople(string memory name) public onlyOpen { /* Open for a certain perion of time*/
           people_count++;
           people[people_count]=name;
      }
 
-     function addperson(string memory name, string memory number)public{
+     function addperson(string memory name, string memory number)public onlyOwner{/* only owner can call it */
           person_count++;
           persons[person_count]=person(name,number);
      }
