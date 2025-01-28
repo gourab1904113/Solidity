@@ -1,0 +1,68 @@
+pragma solidity 0.5.1;
+
+contract Mycontract{
+     string value;
+     string public myname;
+     int public constant id=1904113;
+     bool public check= true;
+     enum State { Waiting, Activate}
+     State public state;
+     int public count=0;
+     int public people_count=0;
+     int public person_count=0;
+
+     mapping(int =>string) public people;
+     mapping(int=>person) public persons;
+     
+
+     struct student{
+        string name;
+        string myid;
+     }
+
+     struct person{
+         string name;
+         string number;
+     }
+
+     student[] public stu;
+
+
+
+     constructor() public {
+            value="Gourab";
+            myname="Gourab";
+            state=State.Waiting;
+     }
+     function get() public view returns(string memory){
+           return value;
+     }
+     function set(string memory val ) public {
+          value=val;
+     }
+      function setName(string memory val ) public {
+          myname=val;
+     }
+     function activate()public{
+          state=State.Activate;
+     }
+     function isStateActive()public view returns(bool){
+        return state==State.Activate;
+     }
+     function addPerson(string memory name,string memory myid )public {
+        stu.push(student(name,myid));
+        count++;
+     }
+
+     function addpeople(string memory name) public {
+          people_count++;
+          people[people_count]=name;
+     }
+
+     function addperson(string memory name, string memory number)public{
+          person_count++;
+          persons[person_count]=person(name,number);
+     }
+
+  
+}
