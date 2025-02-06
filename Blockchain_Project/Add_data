@@ -2,23 +2,13 @@ pragma solidity 0.6.1;
 
 contract Add_data{
 
-   
-      string data=""; 
-      address owner;  
-      
-      constructor() public {
-            owner=msg.sender; 
-     }
+     
+      mapping(address=>string)data;
 
-       modifier onlyOwner(){ /* only owner can call it */
-            require(owner==msg.sender);
-            _;
-     }
-
-      function get_data()public view returns(string memory){
-              return data;
+      function get_data(address own)public view returns(string memory){
+              return data[own];
       }
-       function add_data(string memory new_data) public onlyOwner { /* only owner can call it */
-          data=new_data;
-     }
+       function add_data(string memory new_data) public { /* only owner can call it */
+            data[msg.sender]=new_data;
+      }
 }
