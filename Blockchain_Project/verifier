@@ -1,38 +1,108 @@
 pragma solidity ^0.6.0;
 
 contract Verify {
+
+    mapping(address => mapping(address => bool)) map;
     mapping(address => bool) check;
-    mapping(address => mapping(address => bool)) public map;
-    mapping(address => bool) verifier;
-    int minimum=3;
+    mapping(address => int) min_verifier_count;
+    mapping(address => address[])verifiers;
+
+    
+    function set_min_verifier_count(int val)public{
+           min_verifier_count[msg.sender]=val;
+    }
+    function get_min_verifier_count(address ac)public view returns(int){
+          return min_verifier_count[ac];
+    }
 
 
-    address[] public verifiers=[0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2,
-    0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db,0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB,
-    0x617F2E2fD72FD9D5503197092aC168c91465E7f2,0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB];
-
-
-
-    function is_verified(address account)public returns (bool){
+    function is_verified(address account)public view returns (bool){
         
-            if(check[account]==true)return true;
+            address[] memory arr= verifiers[account];
+
             int count=0;
-            for (uint i = 0; i < verifiers.length; i++) {
-                    address ver=verifiers[i];
+            for (uint i = 0; i < arr.length; i++) {
+                    address ver=arr[i];
 
                     if(map[ver][account]==true){
                          count++;
                     }
              }  
           
-            check[account] = count >= minimum ? true: false;
-
-            return check[account];
+             int minimum= min_verifier_count[account];
+        
+             return count >= minimum ? true: false;
     }
 
-    function(address verifier,address account)public{
+
+
+    function add_verifier(address account)public{
+           address[] memory arr= verifiers[msg.sender];
+
+           bool present=false;
+           for(uint i=0;i<arr.length;i++){
+                   if(arr[i]==account){
+                           present=true;
+                           break;
+                   }
+           }
+           if(present==false){
+                 verifiers[msg.sender].push(account);
+           }
+     
+    }
+
+    function get_verifiers(address account) public view  returns (address[] memory){
+           return verifiers[account];
+    }
+
+    function remove_verifier(address account)public{
           
-             
+           address[] memory arr= verifiers[msg.sender];
+
+           bool present=false;
+           
+           for(uint i=0;i<arr.length;i++){
+                   if(arr[i]==account){
+                           present=true; 
+                   }
+
+                   if(present==true&& i+1<arr.length){
+                         arr[i]=arr[i+1];
+           
+                   }
+
+           }
+           
+
+           if(present==true){
+                  delete verifiers[msg.sender];
+                  for(uint i=0;i<arr.length-1;i++){
+                           verifiers[msg.sender].push(arr[i]);
+                  }
+           }   
     }
+
+    function verify_account(address account)public{
+          
+           address[] memory arr= verifiers[account];
+
+           bool present=false;
+           
+           for(uint i=0;i<arr.length;i++){
+                   if(arr[i]==msg.sender){
+                           present=true; 
+                           break;
+                   }
+           }
+           
+
+           if(present==true){
+                  map[msg.sender][account]=true;
+           }   
+    }
+
+
+
 
 }
