@@ -1,0 +1,101 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity >=0.6.0 <0.9.0;
+
+contract Verify {
+    mapping(address => mapping(address => bool)) map;
+    mapping(address => bool) check;
+    mapping(address => int) min_verifier_count;
+    mapping(address => address[]) verifiers;
+    mapping(address => string) data;
+
+    event Data_Added(string data);
+
+     function get_data(
+        address owner_account
+    ) public view returns (string memory) {
+        return data[owner_account];
+    }
+    function add_data(string memory new_data) public {
+        data[msg.sender] = new_data;
+        emit Data_Added(new_data);
+    }
+
+    function set_min_verifier_count(int val) public {
+        min_verifier_count[msg.sender] = val;
+    }
+    function get_min_verifier_count(address ac) public view returns (int) {
+        return min_verifier_count[ac];
+    }
+
+    function is_verified(address account) public view returns (bool) {
+        address[] memory arr = verifiers[account];
+        if (min_verifier_count[account] == 0) {
+            return false;
+        }
+        int count = 0;
+        for (uint i = 0; i < arr.length; i++) {
+            address ver = arr[i];
+
+            if (map[ver][account] == true) {
+                count++;
+            }
+        }
+        int minimum = min_verifier_count[account];
+        return count >= minimum ? true : false;
+    }
+
+    function add_verifier(address account) public {
+        address[] memory arr = verifiers[msg.sender];
+        bool present = false;
+        for (uint i = 0; i < arr.length; i++) {
+            if (arr[i] == account) {
+                present = true;
+                break;
+            }
+        }
+        if (present == false) {
+            verifiers[msg.sender].push(account);
+        }
+    }
+
+    function get_verifiers(
+        address account
+    ) public view returns (address[] memory) {
+        return verifiers[account];
+    }
+
+    function remove_verifier(address account) public {
+        address[] memory arr = verifiers[msg.sender];
+        bool present = false;
+        for (uint i = 0; i < arr.length; i++) {
+            if (arr[i] == account) {
+                present = true;
+            }
+            if (present == true && i + 1 < arr.length) {
+                arr[i] = arr[i + 1];
+            }
+        }
+        if (present == true) {
+            delete verifiers[msg.sender];
+            for (uint i = 0; i < arr.length - 1; i++) {
+                verifiers[msg.sender].push(arr[i]);
+            }
+        }
+    }
+
+    ///verifiers can verify user account
+    function verify_account(address account) public {
+        address[] memory arr = verifiers[account];
+        bool present = false;
+        for (uint i = 0; i < arr.length; i++) {
+            if (arr[i] == msg.sender) {
+                present = true;
+                break;
+            }
+        }
+        if (present == true) {
+            map[msg.sender][account] = true;
+        }
+    }
+}
